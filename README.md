@@ -3,7 +3,7 @@
 
 A modern and customizable proposal generator built using **React.js**, **Tailwind CSS**, and **Lucide Icons** — designed to create instant, beautiful, professional proposals for your clients in Hindi-English format.
 
-![App Screenshot](https://via.placeholder.com/800x400.png?text=Universal+Proposal+Generator)
+![App Screenshot](https://raw.githubusercontent.com/niteshpawar97/proposal-generator/refs/heads/master/public/screenshort.png)
 
 ---
 
