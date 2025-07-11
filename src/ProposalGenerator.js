@@ -11,7 +11,7 @@ const ProposalGenerator = () => {
     clientBusiness: '',
     yourName: 'Nitesh Kadve',
     yourCompany: 'Niket Group',
-    yourPhone: '8821861409',
+    yourPhone: '8821860000',
     yourEmail: '',
     projectTitle: '',
     problemStatement: '',
@@ -27,50 +27,27 @@ const ProposalGenerator = () => {
 
   const [previewHTML, setPreviewHTML] = useState('');
   const [showPreview, setShowPreview] = useState(false);
+  const isFormValid = formData.clientName.trim() !== '' && formData.budget.trim() !== '';
 
-
-  // const [formData, setFormData] = useState({
-  //   clientName: 'राहुल शर्मा',
-  //   clientCompany: 'Sharma Electronics',
-  //   clientBusiness: 'Retail Electronics Store',
-  //   yourName: 'Nitesh Kadve',
-  //   yourCompany: 'Niket Group',
-  //   yourPhone: '8821861409',
-  //   yourEmail: 'nitesh@niketgroup.in',
-  //   projectTitle: 'शर्मा इलेक्ट्रॉनिक्स ऑनलाइन वेबसाइट',
-  //   problemStatement: 'कंपनी का कोई ऑनलाइन presence नहीं है जिससे नए ग्राहक नहीं मिल पा रहे हैं और existing customers को updates नहीं मिलते।',
-  //   projectType: 'website',
-  //   features: [
-  //   'Responsive Website Design',
-  //   'SEO Optimization',
-  //   'Contact Forms'
-  // ],
-  //   timeline: '4-6',
-  //   budget: '45000',
-  //   maintenance: '3000',
-  //   discount: '15',
-  //   meetingDate: '2025-07-12',
-  //   additionalNotes: 'Client चाहता है WhatsApp integration और future में ecommerce add करने का विकल्प।'
-  // });
 
   const [startWeek, endWeek] = formData.timeline.split('-').map(Number);
 
-const downloadPDF = () => {
-  const iframe = document.querySelector('iframe');
-  const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+  const downloadPDF = () => {
+    const iframe = document.querySelector('iframe');
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
 
-  const element = iframeDoc.body;
+    const element = iframeDoc.body;
 
-  const opt = {
-    margin:       0.3,
-    filename:     `${formData.clientName || 'Client'}_Proposal.pdf`,
-    image:        { type: 'jpeg', quality: 0.98 },
-    html2canvas:  { scale: 2 },
-    jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+    const opt = {
+      margin: 0.3,
+      filename: `${formData.clientName || 'Client'}_Proposal.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+
+    html2pdf().set(opt).from(element).save();
   };
-
-  html2pdf().set(opt).from(element).save();
-};
 
   const projectTypes = {
     website: {
@@ -884,65 +861,79 @@ const downloadPDF = () => {
             </div>
 
             {/* Download Proposal Button */}
+
             <button
+              disabled={!isFormValid}
               onClick={() => {
                 const html = generateHTML();
                 setPreviewHTML(html);
                 setShowPreview(true);
               }}
-              className="bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-green-700 transition duration-200 flex items-center justify-center gap-2"
+              className={`px-6 py-3 rounded-lg shadow-lg flex items-center justify-center gap-2 transition duration-200 ${isFormValid
+                ? 'bg-green-600 text-white hover:bg-green-700'
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                }`}
             >
               <FileText className="w-5 h-5" />
               Preview Proposal
             </button>
 
 
+
             {showPreview && (
-             <div className="fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center px-4">
-  <div className="bg-white w-full max-w-6xl h-[95vh] rounded-xl shadow-2xl overflow-y-auto flex flex-col relative">
+              <div className="fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center px-4">
+                <div className="bg-white w-full max-w-6xl h-[95vh] rounded-xl shadow-2xl overflow-y-auto flex flex-col relative">
 
-    {/* Top Buttons */}
-    <div className="flex justify-between items-center px-4 py-2 border-b bg-gray-100">
-      <button
-        className="text-red-600 text-2xl font-bold"
-        onClick={() => setShowPreview(false)}
-      >
-        ×
-      </button>
+                  {/* Top Buttons */}
+                  <div className="flex justify-between items-center px-4 py-2 border-b bg-gray-100">
+                    <button
+                      className="text-red-600 text-2xl font-bold"
+                      onClick={() => setShowPreview(false)}
+                    >
+                      ×
+                    </button>
 
-      <div className="flex gap-3">
-        <button
-          onClick={downloadProposal}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
-          Download HTML
-        </button>
-        <button
-          onClick={downloadPDF}
-          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-        >
-          Download PDF
-        </button>
-      </div>
-    </div>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={downloadProposal}
+                        className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                      >
+                        Download HTML
+                      </button>
+                      <button
+                        onClick={downloadPDF}
+                        className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+                      >
+                        Download PDF
+                      </button>
+                    </div>
+                  </div>
 
-    {/* Preview */}
-    <div id="pdf-preview" className="flex-1 overflow-auto p-4">
-      <iframe
-        srcDoc={previewHTML}
-        title="Proposal Preview"
-        className="w-full h-full border rounded"
-      ></iframe>
-    </div>
-  </div>
-</div>
+                  {/* Preview */}
+                  <div id="pdf-preview" className="flex-1 overflow-auto p-4">
+                    <iframe
+                      srcDoc={previewHTML}
+                      title="Proposal Preview"
+                      className="w-full h-full border rounded"
+                    ></iframe>
+                  </div>
+                </div>
+              </div>
 
             )}
 
-
-
-
           </div>
+          {/* Footer */}
+          <div className="bg-gray-100 text-center p-4">
+             <p className="text-sm text-gray-600">
+              &copy; {new Date().getFullYear()} Niket Group. All rights reserved.
+            </p>
+              
+            <p className="text-sm text-gray-600 mt-2">
+              Made with ❤️ by <a href="https://niketgroup.in" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Niket Group</a>
+            </p>
+          </div>
+           
         </div>
       </div>
     </div>
