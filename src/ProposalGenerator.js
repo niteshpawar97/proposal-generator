@@ -2,6 +2,7 @@
 import './App.css';
 import React, { useState } from 'react';
 import { Download, FileText, Zap, Star, CheckCircle, Phone, Mail, Building, User, Calendar } from 'lucide-react';
+import html2pdf from 'html2pdf.js';
 
 const ProposalGenerator = () => {
   const [formData, setFormData] = useState({
@@ -23,6 +24,10 @@ const ProposalGenerator = () => {
     meetingDate: '',
     additionalNotes: ''
   });
+
+  const [previewHTML, setPreviewHTML] = useState('');
+  const [showPreview, setShowPreview] = useState(false);
+
 
   // const [formData, setFormData] = useState({
   //   clientName: 'राहुल शर्मा',
@@ -50,7 +55,22 @@ const ProposalGenerator = () => {
 
   const [startWeek, endWeek] = formData.timeline.split('-').map(Number);
 
+const downloadPDF = () => {
+  const iframe = document.querySelector('iframe');
+  const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
 
+  const element = iframeDoc.body;
+
+  const opt = {
+    margin:       0.3,
+    filename:     `${formData.clientName || 'Client'}_Proposal.pdf`,
+    image:        { type: 'jpeg', quality: 0.98 },
+    html2canvas:  { scale: 2 },
+    jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+  };
+
+  html2pdf().set(opt).from(element).save();
+};
 
   const projectTypes = {
     website: {
@@ -177,7 +197,7 @@ const ProposalGenerator = () => {
     }));
   };
 
-  const generateProposal = () => {
+  const generateHTML = () => {
     const selectedProject = projectTypes[formData.projectType];
     const selectedFeatures = formData.features.length > 0 ? formData.features : selectedProject.features;
 
@@ -583,8 +603,12 @@ const ProposalGenerator = () => {
 </body>
 </html>
     `;
+    return proposalHTML;
+  };
 
-    const blob = new Blob([proposalHTML], { type: 'text/html' });
+  const downloadProposal = () => {
+    const html = generateHTML();
+    const blob = new Blob([html], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -858,20 +882,72 @@ const ProposalGenerator = () => {
                 </div>
               </div>
             </div>
-            {/* Generate Proposal Button */}
-            <div className="text-center mt-6">
-              <button
-                onClick={generateProposal}
-                className="bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-blue-700 transition duration-200 flex items-center justify-center gap-2"
-              >
-                <Download className="w-5 h-5" />
-                Generate Proposal
-              </button>
-            </div>
+
+            {/* Download Proposal Button */}
+            <button
+              onClick={() => {
+                const html = generateHTML();
+                setPreviewHTML(html);
+                setShowPreview(true);
+              }}
+              className="bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-green-700 transition duration-200 flex items-center justify-center gap-2"
+            >
+              <FileText className="w-5 h-5" />
+              Preview Proposal
+            </button>
+
+
+            {showPreview && (
+             <div className="fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center px-4">
+  <div className="bg-white w-full max-w-6xl h-[95vh] rounded-xl shadow-2xl overflow-y-auto flex flex-col relative">
+
+    {/* Top Buttons */}
+    <div className="flex justify-between items-center px-4 py-2 border-b bg-gray-100">
+      <button
+        className="text-red-600 text-2xl font-bold"
+        onClick={() => setShowPreview(false)}
+      >
+        ×
+      </button>
+
+      <div className="flex gap-3">
+        <button
+          onClick={downloadProposal}
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+          Download HTML
+        </button>
+        <button
+          onClick={downloadPDF}
+          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
+        >
+          Download PDF
+        </button>
+      </div>
+    </div>
+
+    {/* Preview */}
+    <div id="pdf-preview" className="flex-1 overflow-auto p-4">
+      <iframe
+        srcDoc={previewHTML}
+        title="Proposal Preview"
+        className="w-full h-full border rounded"
+      ></iframe>
+    </div>
+  </div>
+</div>
+
+            )}
+
+
+
+
           </div>
         </div>
       </div>
     </div>
+
+
   );
 };
 
